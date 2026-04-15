@@ -1,0 +1,128 @@
+# =============================================================================
+# GABAergic AD Network Analysis — Configuration
+# =============================================================================
+# Edit paths below to match your local directory structure.
+# Gene sets are curated from: Carello-Collar 2023, Jiménez-Balado & Eich 2021,
+# Krueger-Burg 2025, Marilovtseva et al. 2025.
+
+# -- Paths --------------------------------------------------------------------
+paths:
+  networks_dir: "data/networks"
+  topology_dir: "data/topology"
+  gene_sets_dir: "data/gene_sets"
+  results_dir: "results"
+  figures_dir: "results/figures"
+  tables_dir: "results/tables"
+
+# -- Network file naming convention -------------------------------------------
+# Files follow: {cohort}_{region}_counts_{condition}_topN200000.tsv
+# Topology:     {cohort}_{region}_counts_{condition}_topN200000_nodes_summary.csv
+regions:
+  - name: "DLPFC"
+    cohort: "ROSMAP"
+  - name: "HCN"
+    cohort: "ROSMAP"
+  - name: "PCC"
+    cohort: "ROSMAP"
+  - name: "TC"
+    cohort: "Mayo"
+  - name: "CRB"
+    cohort: "Mayo"
+
+conditions:
+  - "AD"
+  - "control"
+
+# -- Gene ID format -----------------------------------------------------------
+# Your networks use Ensembl IDs (ENSG...). Set to TRUE to map to HGNC symbols.
+use_ensembl: TRUE
+# Ensembl dataset for biomaRt (only used if use_ensembl: TRUE)
+ensembl_dataset: "hsapiens_gene_ensembl"
+
+# -- GABAergic Gene Set (HGNC Symbols) ----------------------------------------
+# Organized by functional sub-pathway for biological annotation.
+gene_set:
+  synthesis:
+    - "GAD1"
+    - "GAD2"
+  transport:
+    - "SLC6A1"    # GAT1
+    - "SLC6A11"   # GAT3
+    - "SLC6A13"   # GAT2
+    - "SLC32A1"   # vGAT
+  gabaa_receptors:
+    - "GABRA1"
+    - "GABRA2"
+    - "GABRA3"
+    - "GABRA4"
+    - "GABRA5"
+    - "GABRA6"
+    - "GABRB1"
+    - "GABRB2"
+    - "GABRB3"
+    - "GABRG1"
+    - "GABRG2"
+    - "GABRG3"
+    - "GABRD"
+    - "GABRE"
+    - "GABRP"
+    - "GABRQ"
+  gabab_receptors:
+    - "GABBR1"
+    - "GABBR2"
+  catabolism:
+    - "ABAT"       # GABA-transaminase
+    - "ALDH5A1"    # Succinic semialdehyde dehydrogenase
+  interneuron_markers:
+    - "PVALB"
+    - "SST"
+    - "VIP"
+    - "CCK"
+    - "CALB1"
+    - "CALB2"
+    - "NPY"
+  synapse_organizers:
+    - "NLGN2"
+    - "NLGN3"
+    - "NRXN1"
+    - "NRXN3"
+    - "SLITRK3"
+    - "GPHN"
+    - "ARHGEF9"
+
+# -- Analysis Parameters ------------------------------------------------------
+analysis:
+  # Modular topology (Script 01)
+  enrichment_method: "fisher"      # "fisher" or "hypergeometric"
+  n_permutations: 10000            # For entropy null distribution
+  min_module_size: 10              # Skip modules smaller than this
+  
+  # Differential connectivity (Script 02)
+  dc_metric: "degree"             # "degree" or "strength" (MI-weighted)
+  
+  # Cross-regional conservation (Script 03)
+  jaccard_threshold: 0.1           # Minimum Jaccard for co-assignment
+
+# -- Plotting -----------------------------------------------------------------
+plotting:
+  width: 10
+  height: 7
+  dpi: 300
+  font_family: "sans"
+  region_colors:
+    DLPFC: "#E63946"
+    HCN: "#457B9D"
+    PCC: "#2A9D8F"
+    TC: "#E9C46A"
+    CRB: "#264653"
+  condition_colors:
+    AD: "#D62828"
+    control: "#023047"
+  subpathway_colors:
+    synthesis: "#1B9E77"
+    transport: "#D95F02"
+    gabaa_receptors: "#7570B3"
+    gabab_receptors: "#E7298A"
+    catabolism: "#66A61E"
+    interneuron_markers: "#E6AB02"
+    synapse_organizers: "#A6761D"
