@@ -1,434 +1,181 @@
 # =============================================================================
 # 01_modular_topology.R — GABAergic Modular Topology Analysis
 # =============================================================================
-# Research Question (a):
-#   How are GABAergic genes distributed across the modular architecture of
-#   co-expression networks? Are they confined to specific modules (functional
-#   confinement) or dispersed (systemic dysregulation)?
-#
-# Analyses:
-#   1. Module enrichment (Fisher's exact test per module)
-#   2. Shannon entropy of modular distribution (vs. permutation null)
-#   3. Topological comparison: GABA genes vs. network background
-#   4. All comparisons: AD vs. Normal, across 5 brain regions
-#
-# Inputs:  topology/*_nodes_summary.csv (Louvain communities + metrics)
-# Outputs: results/tables/01_*, results/figures/01_*
-# =============================================================================
+suppressPackageStartupMessages({ library(data.table); library(ggplot2); library(patchwork) })
 
-suppressPackageStartupMessages({
-  library(data.table)
-  library(ggplot2)
-  library(patchwork)
-})
-
-# =============================================================================
-# 1. MODULE ENRICHMENT (Fisher's exact test)
-# =============================================================================
-
-#' Test enrichment of GABAergic genes in each Louvain module
-#' @param topo data.table: topology file (node, degree, pagerank, ..., membership)
-#' @param gaba_ids Character vector of Ensembl IDs for GABA genes
-#' @param min_module_size Integer: skip modules with fewer total nodes
-#' @return data.table with enrichment results per module
-compute_module_enrichment <- function(topo, gaba_ids, min_module_size = 10) {
-  
-  # Total nodes in network
-  N <- nrow(topo)
-  # GABA genes present in this network
-  gaba_in_net <- intersect(gaba_ids, topo$node)
-  K <- length(gaba_in_net)
-  
+# -- Core analyses ------------------------------------------------------------
+compute_module_enrichment <- function(topo, gaba_ids, min_mod = 10) {
+  N <- nrow(topo); K <- length(intersect(gaba_ids, topo$node))
   if (K == 0) return(data.table())
-  
-  # Flag GABA membership
-  topo[, is_gaba := node %in% gaba_in_net]
-  
-  # Get module sizes and GABA counts per module
-  mod_stats <- topo[, .(
-    module_size   = .N,
-    n_gaba        = sum(is_gaba),
-    gaba_genes    = paste(node[is_gaba], collapse = ";")
-  ), by = membership]
-  
-  # Filter by minimum size
-
-  mod_stats <- mod_stats[module_size >= min_module_size]
-  
-  # Fisher's exact test for each module
-  mod_stats[, c("odds_ratio", "p_value") := {
+  topo[, is_gaba := node %in% gaba_ids]
+  ms <- topo[, .(mod_size = .N, n_gaba = sum(is_gaba),
+                  gaba_genes = paste(node[is_gaba], collapse = ";")), by = membership]
+  ms <- ms[mod_size >= min_mod]
+  ms[, c("odds_ratio", "p_value") := {
     res <- lapply(seq_len(.N), function(i) {
-      # 2x2 contingency: GABA vs non-GABA × in-module vs out-of-module
-      a <- n_gaba[i]                          # GABA in module
-      b <- module_size[i] - n_gaba[i]         # non-GABA in module
-      c_val <- K - n_gaba[i]                  # GABA outside module
-      d <- (N - module_size[i]) - c_val       # non-GABA outside module
-      
-      mat <- matrix(c(a, b, c_val, d), nrow = 2)
-      ft  <- fisher.test(mat, alternative = "greater")
-      list(or = ft$estimate, pv = ft$p.value)
-    })
-    list(
-      sapply(res, `[[`, "or"),
-      sapply(res, `[[`, "pv")
-    )
+      mat <- matrix(c(n_gaba[i], mod_size[i] - n_gaba[i],
+                       K - n_gaba[i], (N - mod_size[i]) - (K - n_gaba[i])), nrow = 2)
+      ft <- fisher.test(mat, alternative = "greater")
+      list(unname(ft$estimate), ft$p.value)
+    }); list(sapply(res, `[[`, 1), sapply(res, `[[`, 2))
   }]
-  
-  # FDR correction
-  mod_stats[, p_adj := p.adjust(p_value, method = "BH")]
-  mod_stats[, is_enriched := p_adj < 0.05]
-  
-  # Clean up
+  ms[, p_adj := p.adjust(p_value, "BH")][, is_enriched := p_adj < 0.05]
   topo[, is_gaba := NULL]
-  
-  mod_stats[order(p_value)]
+  ms[order(p_value)]
 }
 
-# =============================================================================
-# 2. SHANNON ENTROPY OF MODULAR DISTRIBUTION
-# =============================================================================
-
-#' Compute Shannon entropy of gene distribution across modules
-#' @param topo data.table with membership column
-#' @param gene_ids Character vector of gene IDs to evaluate
-#' @return Numeric: Shannon entropy (bits)
-compute_distribution_entropy <- function(topo, gene_ids) {
-  genes_in_net <- intersect(gene_ids, topo$node)
-  if (length(genes_in_net) < 2) return(NA_real_)
-  
-  # Frequency of genes across modules
-  memberships <- topo[node %in% genes_in_net, membership]
-  freq_table  <- table(memberships)
-  props       <- as.numeric(freq_table) / sum(freq_table)
-  
-  # Shannon entropy: H = -sum(p * log2(p))
-  -sum(props * log2(props))
+compute_entropy <- function(topo, ids) {
+  m <- topo[node %in% intersect(ids, topo$node), membership]
+  if (length(m) < 2) return(NA_real_)
+  p <- as.numeric(table(m)) / length(m); -sum(p * log2(p))
 }
 
-#' Generate null distribution of entropy by permutation
-#' @param topo data.table with membership column
-#' @param n_genes Integer: number of genes in the query set
-#' @param n_perm Integer: number of permutations
-#' @return Numeric vector of null entropies
-permute_entropy_null <- function(topo, n_genes, n_perm = 10000) {
-  all_nodes <- topo$node
-  
-  vapply(seq_len(n_perm), function(i) {
-    random_genes <- sample(all_nodes, n_genes, replace = FALSE)
-    compute_distribution_entropy(topo, random_genes)
-  }, numeric(1))
+test_entropy <- function(topo, ids, nperm = 10000) {
+  obs <- compute_entropy(topo, ids); n <- length(intersect(ids, topo$node))
+  if (is.na(obs) || n < 2) return(data.table(n_in_net = n, obs_H = obs,
+    mean_null = NA, sd_null = NA, z = NA, p = NA, direction = NA_character_))
+  nulls <- vapply(seq_len(nperm), function(i)
+    compute_entropy(topo, sample(topo$node, n)), numeric(1))
+  z <- (obs - mean(nulls)) / sd(nulls)
+  data.table(n_in_net = n, obs_H = obs, mean_null = mean(nulls),
+    sd_null = sd(nulls), z = z,
+    p = 2 * min(mean(nulls <= obs), mean(nulls >= obs)),
+    direction = fifelse(z < 0, "confined", "dispersed"))
 }
 
-#' Test whether observed entropy differs from random expectation
-#' @return data.table with: observed_entropy, mean_null, sd_null, z_score, p_value
-test_entropy <- function(topo, gene_ids, n_perm = 10000) {
-  obs   <- compute_distribution_entropy(topo, gene_ids)
-  n_eff <- length(intersect(gene_ids, topo$node))
-  
-  if (is.na(obs) || n_eff < 2) {
-    return(data.table(
-      n_genes_in_net = n_eff, observed_entropy = obs,
-      mean_null = NA, sd_null = NA, z_score = NA, p_empirical = NA
-    ))
-  }
-  
-  null_dist <- permute_entropy_null(topo, n_eff, n_perm)
-  
-  z <- (obs - mean(null_dist)) / sd(null_dist)
-  # Two-sided p-value: is the entropy more extreme than expected?
-  p_low  <- mean(null_dist <= obs)  # low entropy = confinement
-  p_high <- mean(null_dist >= obs)  # high entropy = dispersion
-  p_two  <- 2 * min(p_low, p_high)
-  
-  data.table(
-    n_genes_in_net  = n_eff,
-    observed_entropy = obs,
-    mean_null       = mean(null_dist),
-    sd_null         = sd(null_dist),
-    z_score         = z,
-    p_empirical     = p_two,
-    direction       = ifelse(z < 0, "confined", "dispersed")
-  )
-}
-
-# =============================================================================
-# 3. TOPOLOGICAL COMPARISON: GABA vs. BACKGROUND
-# =============================================================================
-
-#' Compare topological metrics of GABA genes vs. all other genes
-#' @param topo data.table with node, degree, pagerank, kcore columns
-#' @param gaba_ids Character vector of GABA Ensembl IDs
-#' @return data.table with Wilcoxon test results for each metric
-compare_topology_gaba_vs_background <- function(topo, gaba_ids) {
-  
-  genes_in_net <- intersect(gaba_ids, topo$node)
-  if (length(genes_in_net) < 3) return(data.table())
-  
-  topo[, group := fifelse(node %in% genes_in_net, "GABA", "Background")]
-  
-  metrics <- c("degree", "pagerank", "kcore")
-  results <- rbindlist(lapply(metrics, function(m) {
-    gaba_vals <- topo[group == "GABA", get(m)]
-    bg_vals   <- topo[group == "Background", get(m)]
-    
-    wt <- wilcox.test(gaba_vals, bg_vals, alternative = "two.sided")
-    
-    data.table(
-      metric         = m,
-      n_gaba         = length(gaba_vals),
-      n_background   = length(bg_vals),
-      median_gaba    = median(gaba_vals, na.rm = TRUE),
-      median_bg      = median(bg_vals, na.rm = TRUE),
-      fold_change    = median(gaba_vals, na.rm = TRUE) / 
-                        max(median(bg_vals, na.rm = TRUE), 1e-10),
-      W_statistic    = wt$statistic,
-      p_value        = wt$p.value
-    )
+compare_topo <- function(topo, gaba_ids) {
+  gin <- intersect(gaba_ids, topo$node)
+  if (length(gin) < 3) return(data.table())
+  topo[, grp := fifelse(node %in% gin, "GABA", "BG")]
+  res <- rbindlist(lapply(c("degree", "pagerank", "kcore"), function(m) {
+    g <- topo[grp == "GABA", get(m)]; b <- topo[grp == "BG", get(m)]
+    wt <- wilcox.test(g, b)
+    data.table(metric = m, n_gaba = length(g), med_gaba = median(g),
+               med_bg = median(b), W = unname(wt$statistic), p = wt$p.value)
   }))
-  
-  topo[, group := NULL]
-  results
+  topo[, grp := NULL]; res
 }
 
-# =============================================================================
-# 4. PLOTTING FUNCTIONS
-# =============================================================================
-
-#' Bar plot: Number of GABA genes per module, colored by enrichment
-plot_module_enrichment <- function(enrich_dt, region, condition, cfg) {
-  
-  if (nrow(enrich_dt) == 0 || all(enrich_dt$n_gaba == 0)) return(NULL)
-  
-  plot_data <- enrich_dt[n_gaba > 0]
-  plot_data[, module_label := paste0("M", membership)]
-  plot_data[, module_label := factor(module_label, 
-    levels = plot_data[order(-n_gaba), module_label])]
-  
-  ggplot(plot_data, aes(x = module_label, y = n_gaba, fill = is_enriched)) +
-    geom_col(width = 0.7, color = "grey30", linewidth = 0.3) +
-    geom_text(aes(label = n_gaba), vjust = -0.5, size = 3) +
-    scale_fill_manual(
-      values = c("TRUE" = "#D62828", "FALSE" = "grey70"),
-      labels = c("TRUE" = "Enriched (FDR < 0.05)", "FALSE" = "Not enriched"),
-      name   = NULL
-    ) +
-    labs(
-      title    = sprintf("%s — %s", region, condition),
-      subtitle = sprintf("GABAergic gene distribution across Louvain modules"),
-      x = "Module", y = "Number of GABA genes"
-    ) +
-    theme_publication(cfg = cfg) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+annotate_modules <- function(co, rg, cd, cfg, mods, top_n = 3) {
+  fe <- load_enrichment(co, rg, cd, cfg)
+  if (is.null(fe) || nrow(fe) == 0) return(data.table())
+  target <- mods[n_gaba > 0, membership]
+  fs <- fe[CommunityID %in% target]
+  fs[, p.adjust := as.numeric(p.adjust)]
+  fs <- fs[p.adjust < cfg$analysis$enrichment_padj_cutoff]
+  if (nrow(fs) == 0) return(data.table())
+  fs[, ontology := fcase(grepl("^GO:", ID), "GO", grepl("^hsa", ID), "KEGG", default = "Other")]
+  fs[order(p.adjust), head(.SD, top_n), by = .(CommunityID, ontology),
+     .SDcols = c("ID", "Description", "p.adjust", "Count")]
 }
 
-#' Dot plot: GABA vs. Background topological metrics across regions
-plot_topology_comparison <- function(topo_comp_dt, cfg) {
-  
-  topo_comp_dt[, metric := factor(metric, levels = c("degree", "pagerank", "kcore"))]
-  
-  # Reshape for plotting: we need median_gaba and median_bg side by side
-  plot_data <- melt(topo_comp_dt, 
-    id.vars = c("region", "condition", "metric"),
-    measure.vars = c("median_gaba", "median_bg"),
-    variable.name = "group", value.name = "median_value"
-  )
-  plot_data[, group := fifelse(group == "median_gaba", "GABA", "Background")]
-  plot_data[, sig_label := fifelse(
-    topo_comp_dt$p_value[match(paste(region, condition, metric), 
-      paste(topo_comp_dt$region, topo_comp_dt$condition, topo_comp_dt$metric))] < 0.05,
-    "*", ""
-  )]
-  
-  ggplot(plot_data, aes(x = region, y = median_value, color = group, shape = condition)) +
-    geom_point(size = 3, position = position_dodge(width = 0.5)) +
+# -- Plots --------------------------------------------------------------------
+plot_enrichment_bar <- function(dt, rg, cd, cfg) {
+  d <- dt[n_gaba > 0]; if (nrow(d) == 0) return(NULL)
+  d[, ml := factor(paste0("M", membership), levels = d[order(-n_gaba), paste0("M", membership)])]
+  ggplot(d, aes(ml, n_gaba, fill = is_enriched)) +
+    geom_col(width = .7, color = "grey30", linewidth = .3) +
+    geom_text(aes(label = n_gaba), vjust = -.5, size = 3) +
+    scale_fill_manual(values = c("TRUE" = "#D62828", "FALSE" = "grey70"),
+      labels = c("TRUE" = "FDR<0.05", "FALSE" = "NS"), name = NULL) +
+    labs(title = sprintf("%s — %s", rg, cd), x = "Module", y = "GABA genes") +
+    theme_publication(cfg = cfg) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+plot_entropy_hm <- function(dt, cfg) {
+  ggplot(dt, aes(condition, region, fill = z)) +
+    geom_tile(color = "white", linewidth = 1) +
+    geom_text(aes(label = sprintf("z=%.1f\np=%.3f", z, p)), size = 3, color = "white") +
+    scale_fill_gradient2(low = "#2166AC", mid = "grey90", high = "#B2182B",
+      midpoint = 0, name = "Z-score", limits = c(-4, 4), oob = squish) +
+    labs(title = "Entropy of GABAergic Modular Distribution",
+         subtitle = "Z<0: confined | Z>0: dispersed", x = NULL, y = NULL) +
+    theme_publication(cfg = cfg) + theme(panel.grid = element_blank())
+}
+
+plot_topo_dot <- function(dt, cfg) {
+  d <- melt(dt, id.vars = c("region", "condition", "metric"),
+    measure.vars = c("med_gaba", "med_bg"), variable.name = "grp", value.name = "val")
+  d[, grp := fifelse(grp == "med_gaba", "GABA", "Background")]
+  ggplot(d, aes(region, val, color = grp, shape = condition)) +
+    geom_point(size = 3, position = position_dodge(.5)) +
     facet_wrap(~ metric, scales = "free_y", nrow = 1) +
-    scale_color_manual(values = c("GABA" = "#D62828", "Background" = "grey50")) +
-    scale_shape_manual(values = c("AD" = 16, "control" = 17)) +
-    labs(
-      title = "GABAergic vs. Background: Topological Properties",
-      x = NULL, y = "Median value", color = NULL, shape = NULL
-    ) +
+    scale_color_manual(values = c(GABA = "#D62828", Background = "grey50")) +
+    scale_shape_manual(values = c(AD = 16, control = 17)) +
+    labs(title = "GABA vs Background Topology", x = NULL, y = "Median", color = NULL, shape = NULL) +
     theme_publication(cfg = cfg)
 }
 
-#' Heatmap: Entropy z-scores across regions and conditions
-plot_entropy_heatmap <- function(entropy_dt, cfg) {
-  
-  ggplot(entropy_dt, aes(x = condition, y = region, fill = z_score)) +
-    geom_tile(color = "white", linewidth = 1) +
-    geom_text(aes(label = sprintf("z=%.1f\np=%.3f", z_score, p_empirical)), 
-              size = 3, color = "white") +
-    scale_fill_gradient2(
-      low = "#2166AC", mid = "grey90", high = "#B2182B", midpoint = 0,
-      name = "Entropy\nZ-score",
-      limits = c(-4, 4), oob = squish
-    ) +
-    labs(
-      title    = "Modular Distribution Entropy of GABAergic Genes",
-      subtitle = "Z < 0: Confined to few modules | Z > 0: Dispersed across modules",
-      x = NULL, y = NULL
-    ) +
-    theme_publication(cfg = cfg) +
-    theme(panel.grid = element_blank())
+plot_subpathway <- function(topos, gs, cfg) {
+  d <- merge(topos[node %in% gs$ensembl_gene_id, .(node, region, condition)],
+             gs[, .(ensembl_gene_id, subpathway)], by.x = "node", by.y = "ensembl_gene_id")
+  if (nrow(d) == 0) return(NULL)
+  ct <- d[, .N, by = .(region, condition, subpathway)]
+  ggplot(ct, aes(region, N, fill = subpathway)) + geom_col(position = "stack", width = .7) +
+    facet_wrap(~ condition) + scale_fill_manual(values = get_subpathway_colors(cfg)) +
+    labs(title = "Sub-pathway Representation", x = NULL, y = "Genes") +
+    theme_publication(cfg = cfg) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 }
 
-#' GABA gene profile: subpathway composition per module (for enriched modules)
-plot_subpathway_module_composition <- function(topo_all, gene_set, cfg) {
-  
-  # Get GABA genes with their module assignments
-  gaba_nodes <- merge(
-    topo_all[node %in% gene_set$ensembl_gene_id, 
-             .(node, membership, region, condition)],
-    gene_set[, .(ensembl_gene_id, subpathway)],
-    by.x = "node", by.y = "ensembl_gene_id"
-  )
-  
-  if (nrow(gaba_nodes) == 0) return(NULL)
-  
-  # Count subpathway composition per region × condition
-  comp <- gaba_nodes[, .N, by = .(region, condition, subpathway)]
-  
-  ggplot(comp, aes(x = region, y = N, fill = subpathway)) +
-    geom_col(position = "stack", width = 0.7) +
-    facet_wrap(~ condition) +
-    scale_fill_manual(values = get_subpathway_colors(cfg), name = "Sub-pathway") +
-    labs(
-      title = "GABAergic Sub-pathway Representation in Networks",
-      x = NULL, y = "Number of genes"
-    ) +
-    theme_publication(cfg = cfg) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-}
-
-# =============================================================================
-# 5. MAIN RUNNER
-# =============================================================================
-
-#' Run the complete modular topology analysis
-#' @param cfg Config list from load_config()
-#' @param gene_set data.table from build_annotated_gene_set()
-#' @return Invisible list of all results
+# -- Main runner --------------------------------------------------------------
 run_modular_topology <- function(cfg, gene_set) {
-  
-  message("\n", strrep("=", 60))
-  message("SCRIPT 01: MODULAR TOPOLOGY ANALYSIS")
-  message(strrep("=", 60))
-  
-  gaba_ids <- gene_set[!is.na(ensembl_gene_id), ensembl_gene_id]
-  min_mod  <- cfg$analysis$min_module_size
-  n_perm   <- cfg$analysis$n_permutations
-  
-  # ---- A. Module Enrichment -------------------------------------------------
-  message("\n--- A. Module Enrichment (Fisher's exact test) ---")
-  
-  enrichment_fn <- function(cohort, region, condition, cfg) {
-    topo <- load_topology(cohort, region, condition, cfg)
-    if (is.null(topo)) return(data.table())
-    compute_module_enrichment(topo, gaba_ids, min_mod)
+  message("\n", strrep("=", 60), "\nSCRIPT 01: MODULAR TOPOLOGY\n", strrep("=", 60))
+  gids <- gene_set$ensembl_gene_id; mm <- cfg$analysis$min_module_size
+  np <- cfg$analysis$n_permutations; tn <- cfg$analysis$top_n_terms; sd <- "01_modular_topology"
+
+  message("\n--- A. Module Enrichment ---")
+  enr <- iterate_networks(cfg, function(co, rg, cd, cfg)
+    { t <- load_topology(co, rg, cd, cfg); if (is.null(t)) data.table() else compute_module_enrichment(t, gids, mm) })
+  fwrite(enr, file.path(cfg$paths$tables_dir, "01_module_enrichment.csv"))
+
+  message("\n--- B. Entropy ---")
+  ent <- iterate_networks(cfg, function(co, rg, cd, cfg)
+    { t <- load_topology(co, rg, cd, cfg); if (is.null(t)) data.table() else test_entropy(t, gids, np) })
+  fwrite(ent, file.path(cfg$paths$tables_dir, "01_entropy.csv"))
+
+  message("\n--- C. Topology GABA vs BG ---")
+  tc <- iterate_networks(cfg, function(co, rg, cd, cfg)
+    { t <- load_topology(co, rg, cd, cfg); if (is.null(t)) data.table() else compare_topo(t, gids) })
+  fwrite(tc, file.path(cfg$paths$tables_dir, "01_topology_comparison.csv"))
+
+  message("\n--- D. Functional Annotation ---")
+  fa <- iterate_networks(cfg, function(co, rg, cd, cfg) {
+    t <- load_topology(co, rg, cd, cfg); if (is.null(t)) return(data.table())
+    me <- compute_module_enrichment(t, gids, mm)
+    if (nrow(me) == 0) return(data.table())
+    annotate_modules(co, rg, cd, cfg, me, tn) })
+  if (nrow(fa) > 0) fwrite(fa, file.path(cfg$paths$tables_dir, "01_functional_annotation.csv"))
+
+  message("\n--- E. Topologies ---")
+  at <- iterate_networks(cfg, function(co, rg, cd, cfg)
+    { t <- load_topology(co, rg, cd, cfg); if (is.null(t)) data.table() else t })
+
+  message("\n--- F. Plots ---")
+  for (r in unique(enr$region)) for (c in unique(enr$condition)) {
+    p <- plot_enrichment_bar(enr[region == r & condition == c], r, c, cfg)
+    if (!is.null(p)) save_plot(p, sprintf("01_enrich_%s_%s.png", r, c), cfg, sd, 8, 5)
   }
-  
-  enrichment_all <- iterate_networks(cfg, enrichment_fn)
-  fwrite(enrichment_all, file.path(cfg$paths$tables_dir, "01_module_enrichment.csv"))
-  message("Enrichment results saved.")
-  
-  # ---- B. Entropy Analysis --------------------------------------------------
-  message("\n--- B. Shannon Entropy Analysis ---")
-  
-  entropy_fn <- function(cohort, region, condition, cfg) {
-    topo <- load_topology(cohort, region, condition, cfg)
-    if (is.null(topo)) return(data.table())
-    test_entropy(topo, gaba_ids, n_perm)
+  if (nrow(ent) > 0 && any(!is.na(ent$z))) save_plot(plot_entropy_hm(ent, cfg), "01_entropy.png", cfg, sd, 6, 5)
+  if (nrow(tc) > 0) save_plot(plot_topo_dot(tc, cfg), "01_topo_comparison.png", cfg, sd, 12, 5)
+  if (nrow(at) > 0) { p <- plot_subpathway(at, gene_set, cfg); if (!is.null(p)) save_plot(p, "01_subpathway.png", cfg, sd, 10, 6) }
+
+  message("\n--- G. Integrated table ---")
+  if (nrow(enr) > 0 && nrow(fa) > 0) {
+    fs <- fa[, .(top_terms = paste(Description, collapse = " | ")),
+             by = .(region, condition, CommunityID)]
+    setnames(fs, "CommunityID", "membership")
+    intg <- merge(enr[n_gaba > 0, .(region, condition, membership, mod_size, n_gaba, odds_ratio, p_adj, is_enriched)],
+                  fs, by = c("region", "condition", "membership"), all.x = TRUE)
+    intg[is.na(top_terms), top_terms := "—"]
+    fwrite(intg, file.path(cfg$paths$tables_dir, "01_integrated_summary.csv"))
   }
-  
-  entropy_all <- iterate_networks(cfg, entropy_fn)
-  fwrite(entropy_all, file.path(cfg$paths$tables_dir, "01_entropy_analysis.csv"))
-  message("Entropy results saved.")
-  
-  # ---- C. Topological Comparison --------------------------------------------
-  message("\n--- C. Topological Properties: GABA vs. Background ---")
-  
-  topo_comp_fn <- function(cohort, region, condition, cfg) {
-    topo <- load_topology(cohort, region, condition, cfg)
-    if (is.null(topo)) return(data.table())
-    compare_topology_gaba_vs_background(topo, gaba_ids)
-  }
-  
-  topo_comp_all <- iterate_networks(cfg, topo_comp_fn)
-  fwrite(topo_comp_all, file.path(cfg$paths$tables_dir, "01_topology_comparison.csv"))
-  message("Topology comparison saved.")
-  
-  # ---- D. Load all topologies for composition plot --------------------------
-  message("\n--- D. Collecting topologies for composition plot ---")
-  
-  all_topos_fn <- function(cohort, region, condition, cfg) {
-    topo <- load_topology(cohort, region, condition, cfg)
-    if (is.null(topo)) return(data.table())
-    topo
-  }
-  
-  all_topos <- iterate_networks(cfg, all_topos_fn)
-  
-  # ---- E. Generate Plots ----------------------------------------------------
-  message("\n--- E. Generating plots ---")
-  
-  # E1. Module enrichment bar plots (one per region × condition)
-  for (reg in unique(enrichment_all$region)) {
-    for (cond in unique(enrichment_all$condition)) {
-      sub <- enrichment_all[region == reg & condition == cond]
-      p <- plot_module_enrichment(sub, reg, cond, cfg)
-      if (!is.null(p)) {
-        save_plot(p, sprintf("01_enrichment_%s_%s.png", reg, cond), cfg,
-                  subdir = "01_modular_topology", width = 8, height = 5)
-      }
-    }
-  }
-  
-  # E2. Entropy heatmap
-  if (nrow(entropy_all) > 0 && any(!is.na(entropy_all$z_score))) {
-    p_entropy <- plot_entropy_heatmap(entropy_all, cfg)
-    save_plot(p_entropy, "01_entropy_heatmap.png", cfg,
-              subdir = "01_modular_topology", width = 6, height = 5)
-  }
-  
-  # E3. Topology comparison dot plot
-  if (nrow(topo_comp_all) > 0) {
-    p_topo <- plot_topology_comparison(topo_comp_all, cfg)
-    save_plot(p_topo, "01_topology_gaba_vs_background.png", cfg,
-              subdir = "01_modular_topology", width = 12, height = 5)
-  }
-  
-  # E4. Sub-pathway composition
-  if (nrow(all_topos) > 0) {
-    p_comp <- plot_subpathway_module_composition(all_topos, gene_set, cfg)
-    if (!is.null(p_comp)) {
-      save_plot(p_comp, "01_subpathway_composition.png", cfg,
-                subdir = "01_modular_topology", width = 10, height = 6)
-    }
-  }
-  
-  # ---- F. Summary -----------------------------------------------------------
+
   message("\n--- Summary ---")
-  
-  if (nrow(enrichment_all) > 0) {
-    n_enriched <- enrichment_all[is_enriched == TRUE, .N]
-    n_total_mods <- nrow(enrichment_all)
-    message(sprintf("  Enriched modules (FDR<0.05): %d / %d tested", 
-                    n_enriched, n_total_mods))
+  if (nrow(enr) > 0) message(sprintf("  Enriched modules: %d / %d", sum(enr$is_enriched, na.rm = TRUE), nrow(enr)))
+  if (nrow(ent) > 0 && any(!is.na(ent$z))) {
+    message(sprintf("  Confined: %d | Dispersed: %d", nrow(ent[direction == "confined" & p < .05]),
+                    nrow(ent[direction == "dispersed" & p < .05])))
   }
-  
-  if (nrow(entropy_all) > 0) {
-    confined   <- entropy_all[direction == "confined" & p_empirical < 0.05]
-    dispersed  <- entropy_all[direction == "dispersed" & p_empirical < 0.05]
-    message(sprintf("  Significantly confined: %d networks", nrow(confined)))
-    message(sprintf("  Significantly dispersed: %d networks", nrow(dispersed)))
-  }
-  
-  message("\nScript 01 complete.\n")
-  
-  invisible(list(
-    enrichment  = enrichment_all,
-    entropy     = entropy_all,
-    topo_comp   = topo_comp_all,
-    all_topos   = all_topos
-  ))
+  message("\nScript 01 done.\n")
+  invisible(list(enrichment = enr, entropy = ent, topo_comp = tc, func = fa, topos = at))
 }

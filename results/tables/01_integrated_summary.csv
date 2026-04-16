@@ -1,0 +1,39 @@
+region,condition,membership,mod_size,n_gaba,odds_ratio,p_adj,is_enriched,top_terms
+CRB,AD,1,89,1,5.00667918928582,0.87416378345296,FALSE,G protein-coupled receptor signaling pathway
+CRB,AD,2,444,11,19.7800146012066,1.91164798921796e-08,TRUE,synaptic signaling | trans-synaptic signaling | chemical synaptic transmission
+CRB,AD,3,1329,1,0.289521857765379,1,FALSE,protein folding | protein modification by small protein conjugation or removal | response to topologically incorrect protein
+CRB,AD,7,1310,1,0.294383856730385,1,FALSE,—
+CRB,AD,11,1041,5,2.34580331359496,0.714313253031613,FALSE,synaptic vesicle cycle | vesicle-mediated transport in synapse | trans-synaptic signaling
+CRB,AD,15,1033,4,1.79148575463499,0.87416378345296,FALSE,circulatory system development | vasculature development | tube development
+CRB,control,1,1102,2,0.680520331529342,1,FALSE,—
+CRB,control,3,509,9,10.593819279194,3.16678589137909e-05,TRUE,synaptic signaling | trans-synaptic signaling | chemical synaptic transmission
+CRB,control,6,1324,6,2.02716854629307,0.488044984925757,FALSE,vesicle-mediated transport in synapse | synaptic vesicle cycle | synaptic vesicle exocytosis
+CRB,control,8,1050,6,2.64647894283408,0.292934010924624,FALSE,tube development | epithelium development | circulatory system development
+CRB,control,10,1617,1,0.207671756434724,1,FALSE,protein folding | RNA-templated DNA biosynthetic process | telomere maintenance via telomerase
+DLPFC,AD,1,924,1,0.173385992817616,1,FALSE,cell migration | circulatory system development | glial cell differentiation
+DLPFC,AD,3,590,5,1.83160015729519,0.981528205874496,FALSE,—
+DLPFC,AD,4,774,16,11.1025420542505,4.6293913950838e-07,TRUE,synaptic signaling | chemical synaptic transmission | anterograde trans-synaptic signaling
+DLPFC,AD,5,821,1,0.200873248458444,1,FALSE,aerobic respiration | cellular respiration | mitochondrion organization
+DLPFC,control,2,1220,2,0.296393343695866,1,FALSE,circulatory system development | vasculature development | tube morphogenesis
+DLPFC,control,4,1184,3,0.48153716940742,1,FALSE,generation of precursor metabolites and energy | mitochondrion organization | intracellular protein transport
+DLPFC,control,5,882,16,8.16472590577339,1.99276256535775e-06,TRUE,chemical synaptic transmission | anterograde trans-synaptic signaling | trans-synaptic signaling
+DLPFC,control,9,660,1,0.29600061365276,1,FALSE,RNA processing | mRNA metabolic process | RNA splicing
+HCN,AD,4,848,15,49.9154953329958,5.11442061835704e-08,TRUE,synaptic signaling | chemical synaptic transmission | anterograde trans-synaptic signaling
+HCN,AD,7,303,1,0.729830348473683,1,FALSE,protein modification by small protein conjugation or removal | post-translational protein modification | modification-dependent protein catabolic process
+HCN,control,2,901,1,0.280740006307141,1,FALSE,immune response | regulation of immune system process | defense response
+HCN,control,4,890,14,21.6401649996186,1.56924344677182e-07,TRUE,synaptic signaling | trans-synaptic signaling | chemical synaptic transmission
+HCN,control,7,1208,1,0.193439834321273,1,FALSE,cellular respiration | aerobic respiration | oxidative phosphorylation
+HCN,control,16,10,1,34.0254822895391,0.202723636607816,FALSE,—
+PCC,AD,3,907,11,10.9690976419331,0.000119971862472185,TRUE,chemical synaptic transmission | anterograde trans-synaptic signaling | synaptic signaling
+PCC,AD,8,1072,1,0.226868479683076,1,FALSE,cell migration | tube development | blood vessel morphogenesis
+PCC,control,3,784,12,11.5084460723399,1.93268437208641e-05,TRUE,chemical synaptic transmission | anterograde trans-synaptic signaling | trans-synaptic signaling
+PCC,control,8,1804,1,0.0927157950643523,1,FALSE,tissue development | epithelium development | circulatory system development
+PCC,control,13,11,1,27.7828552373613,0.204387544011141,FALSE,regulation of postsynaptic membrane potential | regulation of cytosolic calcium ion concentration | glutamate receptor signaling pathway
+TC,AD,2,846,6,1.015709323163,1,FALSE,endosomal transport
+TC,AD,3,446,3,0.951851297167697,1,FALSE,—
+TC,AD,4,747,10,2.7569853649003,0.279586640469455,FALSE,synaptic signaling | trans-synaptic signaling | chemical synaptic transmission
+TC,control,2,338,8,6.63531553745833,0.00115526446236379,TRUE,metal ion transport | sodium ion transport | chemical synaptic transmission
+TC,control,3,797,2,0.448082101875059,1,FALSE,—
+TC,control,4,420,2,0.934111897621887,1,FALSE,immune response | defense response | positive regulation of immune system process
+TC,control,5,989,5,0.997272648758266,1,FALSE,—
+TC,control,6,551,6,2.54860456671842,0.182405882285948,FALSE,synaptic signaling | chemical synaptic transmission | anterograde trans-synaptic signaling

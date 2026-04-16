@@ -1,0 +1,90 @@
+CommunityID,ontology,ID,Description,p.adjust,Count,region,condition,cohort
+5,GO,GO:0009060,aerobic respiration,2.32682935352854e-20,66,DLPFC,AD,ROSMAP
+5,GO,GO:0045333,cellular respiration,3.13488099674098e-19,69,DLPFC,AD,ROSMAP
+5,GO,GO:0007005,mitochondrion organization,7.81506122096242e-18,95,DLPFC,AD,ROSMAP
+4,GO,GO:0099536,synaptic signaling,1.05646293996698e-19,131,DLPFC,AD,ROSMAP
+4,GO,GO:0007268,chemical synaptic transmission,1.05646293996698e-19,128,DLPFC,AD,ROSMAP
+4,GO,GO:0098916,anterograde trans-synaptic signaling,1.05646293996698e-19,128,DLPFC,AD,ROSMAP
+1,GO,GO:0016477,cell migration,6.08107123583544e-11,152,DLPFC,AD,ROSMAP
+1,GO,GO:0072359,circulatory system development,6.08107123583544e-11,110,DLPFC,AD,ROSMAP
+1,GO,GO:0010001,glial cell differentiation,6.08107123583544e-11,51,DLPFC,AD,ROSMAP
+5,GO,GO:0007268,chemical synaptic transmission,6.71371338884592e-25,139,DLPFC,control,ROSMAP
+5,GO,GO:0098916,anterograde trans-synaptic signaling,6.71371338884592e-25,139,DLPFC,control,ROSMAP
+5,GO,GO:0099537,trans-synaptic signaling,6.71371338884592e-25,139,DLPFC,control,ROSMAP
+2,GO,GO:0072359,circulatory system development,1.35991598951781e-15,153,DLPFC,control,ROSMAP
+2,GO,GO:0001944,vasculature development,1.35991598951781e-15,115,DLPFC,control,ROSMAP
+2,GO,GO:0035239,tube morphogenesis,5.01553544532337e-15,128,DLPFC,control,ROSMAP
+9,GO,GO:0006396,RNA processing,1.02495084397537e-09,63,DLPFC,control,ROSMAP
+9,GO,GO:0016071,mRNA metabolic process,2.11031495308055e-07,48,DLPFC,control,ROSMAP
+9,GO,GO:0008380,RNA splicing,2.11031495308055e-07,38,DLPFC,control,ROSMAP
+4,GO,GO:0006091,generation of precursor metabolites and energy,1.86230240336761e-05,82,DLPFC,control,ROSMAP
+4,GO,GO:0007005,mitochondrion organization,1.86230240336761e-05,84,DLPFC,control,ROSMAP
+4,GO,GO:0006886,intracellular protein transport,0.000127645691270875,116,DLPFC,control,ROSMAP
+4,GO,GO:0099536,synaptic signaling,3.80920345692172e-43,161,HCN,AD,ROSMAP
+4,GO,GO:0007268,chemical synaptic transmission,5.06950680221593e-42,156,HCN,AD,ROSMAP
+4,GO,GO:0098916,anterograde trans-synaptic signaling,5.06950680221593e-42,156,HCN,AD,ROSMAP
+7,GO,GO:0070647,protein modification by small protein conjugation or removal,6.01079842045001e-05,46,HCN,AD,ROSMAP
+7,GO,GO:0043687,post-translational protein modification,6.01079842045001e-05,50,HCN,AD,ROSMAP
+7,GO,GO:0019941,modification-dependent protein catabolic process,6.69918000537553e-05,40,HCN,AD,ROSMAP
+4,GO,GO:0099536,synaptic signaling,2.54882229354117e-48,165,HCN,control,ROSMAP
+4,GO,GO:0099537,trans-synaptic signaling,1.2331261862381e-47,161,HCN,control,ROSMAP
+4,GO,GO:0007268,chemical synaptic transmission,2.18775029638063e-47,160,HCN,control,ROSMAP
+2,GO,GO:0006955,immune response,7.73333610547175e-46,212,HCN,control,ROSMAP
+2,GO,GO:0002682,regulation of immune system process,1.91297493732259e-37,192,HCN,control,ROSMAP
+2,GO,GO:0006952,defense response,1.71976190677786e-34,194,HCN,control,ROSMAP
+7,GO,GO:0045333,cellular respiration,1.78663105875921e-19,82,HCN,control,ROSMAP
+7,GO,GO:0009060,aerobic respiration,1.78663105875921e-19,76,HCN,control,ROSMAP
+7,GO,GO:0006119,oxidative phosphorylation,1.48350717905141e-18,65,HCN,control,ROSMAP
+3,GO,GO:0007268,chemical synaptic transmission,9.06614439484476e-36,141,PCC,AD,ROSMAP
+3,GO,GO:0098916,anterograde trans-synaptic signaling,9.06614439484476e-36,141,PCC,AD,ROSMAP
+3,GO,GO:0099536,synaptic signaling,9.06614439484476e-36,144,PCC,AD,ROSMAP
+8,GO,GO:0016477,cell migration,5.67261014515356e-20,184,PCC,AD,ROSMAP
+8,GO,GO:0035295,tube development,3.05877301068953e-19,129,PCC,AD,ROSMAP
+8,GO,GO:0048514,blood vessel morphogenesis,3.16022370236194e-19,86,PCC,AD,ROSMAP
+3,GO,GO:0007268,chemical synaptic transmission,1.48278570423628e-37,134,PCC,control,ROSMAP
+3,GO,GO:0098916,anterograde trans-synaptic signaling,1.48278570423628e-37,134,PCC,control,ROSMAP
+3,GO,GO:0099537,trans-synaptic signaling,1.48278570423628e-37,134,PCC,control,ROSMAP
+8,GO,GO:0009888,tissue development,1.46328614955717e-12,232,PCC,control,ROSMAP
+8,GO,GO:0060429,epithelium development,3.38909776174554e-12,151,PCC,control,ROSMAP
+8,GO,GO:0072359,circulatory system development,2.7730060599608e-11,150,PCC,control,ROSMAP
+13,GO,GO:0060078,regulation of postsynaptic membrane potential,0.00173790090281204,4,PCC,control,ROSMAP
+13,GO,GO:0051480,regulation of cytosolic calcium ion concentration,0.00173790090281204,3,PCC,control,ROSMAP
+13,GO,GO:0007215,glutamate receptor signaling pathway,0.0019966985926052,3,PCC,control,ROSMAP
+4,GO,GO:0099536,synaptic signaling,3.06471587437806e-15,139,TC,AD,Mayo
+4,GO,GO:0099537,trans-synaptic signaling,4.49164497356796e-14,134,TC,AD,Mayo
+4,GO,GO:0007268,chemical synaptic transmission,4.69144430825985e-14,133,TC,AD,Mayo
+2,GO,GO:0016197,endosomal transport,0.028618994125543,29,TC,AD,Mayo
+4,GO,GO:0006955,immune response,1.24934615251907e-33,122,TC,control,Mayo
+4,GO,GO:0006952,defense response,1.19237944697169e-30,116,TC,control,Mayo
+4,GO,GO:0002684,positive regulation of immune system process,9.02016586840056e-28,94,TC,control,Mayo
+6,GO,GO:0099536,synaptic signaling,8.19610601508874e-08,79,TC,control,Mayo
+6,GO,GO:0007268,chemical synaptic transmission,4.88247511415279e-07,74,TC,control,Mayo
+6,GO,GO:0098916,anterograde trans-synaptic signaling,4.88247511415279e-07,74,TC,control,Mayo
+2,GO,GO:0030001,metal ion transport,0.00406229395769346,41,TC,control,Mayo
+2,GO,GO:0006814,sodium ion transport,0.00712730690968217,16,TC,control,Mayo
+2,GO,GO:0007268,chemical synaptic transmission,0.00712730690968217,43,TC,control,Mayo
+15,GO,GO:0072359,circulatory system development,2.0758266210969e-27,146,CRB,AD,Mayo
+15,GO,GO:0001944,vasculature development,4.46544197045983e-25,106,CRB,AD,Mayo
+15,GO,GO:0035295,tube development,4.46544197045983e-25,139,CRB,AD,Mayo
+2,GO,GO:0099536,synaptic signaling,1.13899999681322e-21,71,CRB,AD,Mayo
+2,GO,GO:0099537,trans-synaptic signaling,1.04283961186873e-20,68,CRB,AD,Mayo
+2,GO,GO:0007268,chemical synaptic transmission,7.4982979385775e-20,66,CRB,AD,Mayo
+3,GO,GO:0006457,protein folding,4.24856331673662e-12,58,CRB,AD,Mayo
+3,GO,GO:0070647,protein modification by small protein conjugation or removal,2.71536981732697e-09,126,CRB,AD,Mayo
+3,GO,GO:0035966,response to topologically incorrect protein,4.3227628186143e-09,39,CRB,AD,Mayo
+11,GO,GO:0099504,synaptic vesicle cycle,4.02693678491477e-09,43,CRB,AD,Mayo
+11,GO,GO:0099003,vesicle-mediated transport in synapse,4.02693678491477e-09,45,CRB,AD,Mayo
+11,GO,GO:0099537,trans-synaptic signaling,8.70424794502904e-08,82,CRB,AD,Mayo
+1,GO,GO:0007186,G protein-coupled receptor signaling pathway,0.02917103267105,7,CRB,AD,Mayo
+3,GO,GO:0099536,synaptic signaling,4.64952826342264e-20,78,CRB,control,Mayo
+3,GO,GO:0099537,trans-synaptic signaling,4.64952826342264e-20,76,CRB,control,Mayo
+3,GO,GO:0007268,chemical synaptic transmission,2.62819675932761e-19,74,CRB,control,Mayo
+8,GO,GO:0035295,tube development,1.37406133815682e-11,116,CRB,control,Mayo
+8,GO,GO:0060429,epithelium development,1.64063890149589e-11,119,CRB,control,Mayo
+8,GO,GO:0072359,circulatory system development,1.64063890149589e-11,120,CRB,control,Mayo
+10,GO,GO:0006457,protein folding,7.69637223595579e-06,47,CRB,control,Mayo
+10,GO,GO:0006278,RNA-templated DNA biosynthetic process,7.69637223595579e-06,21,CRB,control,Mayo
+10,GO,GO:0007004,telomere maintenance via telomerase,7.69637223595579e-06,21,CRB,control,Mayo
+6,GO,GO:0099003,vesicle-mediated transport in synapse,0.00065608067077641,46,CRB,control,Mayo
+6,GO,GO:0099504,synaptic vesicle cycle,0.000790803504928554,43,CRB,control,Mayo
+6,GO,GO:0016079,synaptic vesicle exocytosis,0.00169004418631296,25,CRB,control,Mayo
