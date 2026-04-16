@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marco de Proyecto — Reorganización del Sistema GABAérgico en Alzheimer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+  :root {
+    --primary: #1a365d;
+    --secondary: #2c5282;
+    --accent: #e53e3e;
+    --accent-soft: #fed7d7;
+    --bg: #fafbfc;
+    --card-bg: #ffffff;
+    --text: #2d3748;
+    --text-light: #718096;
+    --border: #e2e8f0;
+    --gaba-purple: #6b46c1;
+    --gaba-purple-soft: #e9d8fd;
+    --ad-orange: #dd6b20;
+    --ad-orange-soft: #feebc8;
+    --network-teal: #0d9488;
+    --network-teal-soft: #ccfbf1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 16px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--gaba-purple) 100%);
+    color: white;
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(255,255,255,0.03) 0%, transparent 50%);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2em;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .header .subtitle {
+    font-size: 1.05em;
+    font-weight: 300;
+    opacity: 0.9;
+    max-width: 750px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .header .tag {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 18px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    font-size: 0.82em;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* SECTIONS */
+  .section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .section-title {
+    font-size: 1.35em;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--gaba-purple);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .num {
+    background: var(--gaba-purple);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78em;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* HIGHLIGHT BOXES */
+  .highlight-box {
+    border-left: 4px solid;
+    padding: 18px 22px;
+    border-radius: 0 8px 8px 0;
+    margin: 18px 0;
+    font-size: 0.97em;
+  }
+  .highlight-box.hypothesis {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .highlight-box.question {
+    border-color: var(--gaba-purple);
+    background: var(--gaba-purple-soft);
+  }
+  .highlight-box.objective {
+    border-color: var(--network-teal);
+    background: var(--network-teal-soft);
+  }
+  .highlight-box strong {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.78em;
+    letter-spacing: 0.8px;
+  }
+  .highlight-box.hypothesis strong { color: var(--accent); }
+  .highlight-box.question strong { color: var(--gaba-purple); }
+  .highlight-box.objective strong { color: var(--network-teal); }
+
+  /* OBJECTIVES LIST */
+  .obj-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 14px;
+  }
+  .obj-list li {
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #f7fafc;
+    border: 1px solid var(--border);
+    position: relative;
+    padding-left: 44px;
+  }
+  .obj-list li::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--secondary);
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72em;
+    font-weight: 600;
+  }
+
+  /* WORKFLOW */
+  .workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+  }
+  .wf-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+  }
+  .wf-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 44px;
+  }
+  .wf-dot {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85em;
+    color: white;
+    flex-shrink: 0;
+  }
+  .wf-line {
+    width: 3px;
+    height: 28px;
+    background: var(--border);
+  }
+  .wf-content {
+    padding: 8px 0 28px;
+    flex: 1;
+  }
+  .wf-content h4 {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .wf-content p {
+    font-size: 0.92em;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+  .wf-step:nth-child(1) .wf-dot { background: var(--ad-orange); }
+  .wf-step:nth-child(2) .wf-dot { background: var(--network-teal); }
+  .wf-step:nth-child(3) .wf-dot { background: var(--gaba-purple); }
+  .wf-step:nth-child(4) .wf-dot { background: var(--secondary); }
+  .wf-step:nth-child(5) .wf-dot { background: var(--accent); }
+  .wf-step:nth-child(6) .wf-dot { background: var(--primary); }
+
+  /* DATA TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 0.9em;
+  }
+  .data-table thead th {
+    background: var(--primary);
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .data-table thead th:first-child { border-radius: 8px 0 0 0; }
+  .data-table thead th:last-child { border-radius: 0 8px 0 0; }
+  .data-table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tbody tr:nth-child(even) { background: #f7fafc; }
+  .data-table tbody tr:hover { background: #edf2f7; }
+
+  /* GENE TABLE */
+  .gene-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin: 2px;
+  }
+  .gene-badge.synth { background: #c6f6d5; color: #276749; }
+  .gene-badge.receptor { background: #bee3f8; color: #2a4365; }
+  .gene-badge.transport { background: #e9d8fd; color: #553c9a; }
+  .gene-badge.catab { background: #fefcbf; color: #975a16; }
+  .gene-badge.intern { background: #fed7d7; color: #9b2c2c; }
+
+  /* REFERENCES */
+  .ref-list {
+    font-size: 0.88em;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+  .ref-list li {
+    margin-bottom: 6px;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8em;
+    color: var(--text-light);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .header { padding: 36px 20px; }
+    .header h1 { font-size: 1.5em; }
+    .section { padding: 24px 20px; }
+  }
+
+  p { margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<div class="header">
+  <h1>Reorganización Topológica del Sistema GABAérgico en Redes de Coexpresión Asociadas a Patología Amiloide</h1>
+  <p class="subtitle">Marco de proyecto para análisis de Medicina de Redes y Bioinformática Traslacional — Postgrado 2026</p>
+  <span class="tag">Network Medicine · GABA · Alzheimer's Disease · Coexpression Networks</span>
+</div>
+
+<!-- ==================== CONTENT ==================== -->
+<div class="container">
+
+<!-- SECTION 1: TÍTULO -->
+<div class="section">
+  <div class="section-title"><span class="num">1</span> Título del Proyecto</div>
+  <p style="font-size:1.1em; font-weight:600; color:var(--primary); text-align:center; padding:16px 0;">
+    "Reorganización topológica del sistema GABAérgico en redes de coexpresión génica de cinco regiones cerebrales: un análisis comparativo entre patología beta-amiloide y envejecimiento normal"
+  </p>
+</div>
+
+<!-- SECTION 2: HIPÓTESIS, PREGUNTA, OBJETIVOS -->
+<div class="section">
+  <div class="section-title"><span class="num">2</span> Hipótesis, Pregunta de Investigación y Objetivos</div>
+
+  <div class="highlight-box hypothesis">
+    <strong>Hipótesis</strong>
+    La patología beta-amiloide induce una reorganización topológica del sistema GABAérgico en las redes de coexpresión génica cerebral, caracterizada por la dispersión modular de genes GABAérgicos, la pérdida diferencial de conectividad en sub-vías específicas (biosíntesis, señalización receptorial y recaptación), y un gradiente de desorganización que se correlaciona con la vulnerabilidad regional conocida al Alzheimer — siendo más pronunciado en regiones como DLPFC e hipocampo que en cerebelo.
+  </div>
+
+  <div class="highlight-box question">
+    <strong>Pregunta de Investigación</strong>
+    ¿Cómo se reorganiza la arquitectura topológica del sistema GABAérgico — en términos de distribución modular, conectividad diferencial y firma topológica regional — en las redes de coexpresión génica de individuos con patología amiloide comparados con individuos con envejecimiento no patológico?
+  </div>
+
+  <div class="highlight-box objective">
+    <strong>Objetivo General</strong>
+    Caracterizar la reorganización topológica del sistema GABAérgico en redes de coexpresión génica derivadas de cinco regiones cerebrales, comparando individuos con patología beta-amiloide frente a envejecimiento normal, mediante métricas de red e integración con conocimiento biológico del circuito GABAérgico.
+  </div>
+
+  <p style="font-weight:600; margin-top:20px; margin-bottom:8px;">Objetivos Específicos:</p>
+  <ol class="obj-list">
+    <li data-num="1"><strong>Topología Modular:</strong> Evaluar la distribución de genes GABAérgicos en los módulos de Louvain de cada red, cuantificando la concentración/dispersión modular mediante entropía de Shannon y enriquecimiento hipergeométrico, y comparando estos patrones entre condiciones AD y control para cada región cerebral.</li>
+    <li data-num="2"><strong>Conectividad Diferencial:</strong> Identificar los genes GABAérgicos con cambios más drásticos en métricas de centralidad (degree, PageRank, k-core) y membresía modular entre condiciones, clasificándolos por sub-vía funcional (biosíntesis, receptores, transportadores, catabolismo e interneuronas).</li>
+    <li data-num="3"><strong>Firma Topológica Regional:</strong> Construir un perfil topológico GABAérgico compuesto por región cerebral que integre los hallazgos de dispersión modular y conectividad diferencial, y evaluar si este perfil discrimina entre regiones con alta y baja vulnerabilidad a la patología amiloide.</li>
+  </ol>
+</div>
+
+<!-- SECTION 3: FLUJO METODOLÓGICO -->
+<div class="section">
+  <div class="section-title"><span class="num">3</span> Flujo Metodológico</div>
+  <p style="margin-bottom:20px;">El siguiente flujo resume la estrategia analítica, diseñado para su presentación en seminario.</p>
+
+  <div class="workflow">
+    <!-- Step 1 -->
+    <div class="wf-step">
+      <div class="wf-connector">
+        <div class="wf-dot">1</div>
+        <div class="wf-line"></div>
+      </div>
+      <div class="wf-content">
+        <h4>Carga y Curación de Datos</h4>
+        <p>Lectura de 10 redes de coexpresión (edge lists con MI) y 10 archivos de topología nodal (degree, PageRank, k-core, membresía Louvain) de 5 regiones cerebrales × 2 condiciones (AD/Control). Datasets: ROSMAP (DLPFC, HCN, PCC) y Mayo Clinic (TC, CRB). Total: 200,000 aristas top por red.</p>
+      </div>
+    </div>
+    <!-- Step 2 -->
+    <div class="wf-step">
+      <div class="wf-connector">
+        <div class="wf-dot">2</div>
+        <div class="wf-line"></div>
+      </div>
+      <div class="wf-content">
+        <h4>Definición del Gene Set GABAérgico</h4>
+        <p>Compilación de un set curado de genes GABAérgicos a partir de la literatura (Carello-Collar et al. 2023; Jiménez-Balado & Eich, 2021; Krueger-Burg, 2025), clasificados en sub-vías: biosíntesis (GAD1/GAD2), transporte vesicular (SLC32A1), receptores ionotrópicos (GABRA/GABRB/GABRG), receptores metabotrópicos (GABBR1/GABBR2), transportadores (SLC6A1/SLC6A11/SLC6A13), catabolismo (ABAT, ALDH5A1), y marcadores de interneuronas (PVALB, SST, VIP, CCK). Mapeo Ensembl ID ↔ símbolo.</p>
+      </div>
+    </div>
+    <!-- Step 3 -->
+    <div class="wf-step">
+      <div class="wf-connector">
+        <div class="wf-dot">3</div>
+        <div class="wf-line"></div>
+      </div>
+      <div class="wf-content">
+        <h4>Análisis de Topología Modular (Objetivo 1)</h4>
+        <p>Para cada red: (a) calcular la entropía de Shannon de la distribución de membresías modulares de genes GABAérgicos y compararla contra una distribución nula (10,000 permutaciones de gene sets del mismo tamaño), (b) test hipergeométrico de enriquecimiento GABAérgico por módulo Louvain, y (c) comparar centralidad media (degree, PageRank, k-core) de genes GABA vs. fondo genómico.</p>
+      </div>
+    </div>
+    <!-- Step 4 -->
+    <div class="wf-step">
+      <div class="wf-connector">
+        <div class="wf-dot">4</div>
+        <div class="wf-line"></div>
+      </div>
+      <div class="wf-content">
+        <h4>Análisis de Conectividad Diferencial (Objetivo 2)</h4>
+        <p>Para cada gen GABAérgico presente en ambas condiciones de una región: (a) calcular Δdegree, ΔPageRank, Δk-core (AD − Control), (b) identificar genes con cambio de membresía modular (rewiring topológico), y (c) cuantificar pérdida/ganancia de aristas GABAérgicas (GABA-GABA y GABA-nonGABA). Clasificación funcional por sub-vía.</p>
+      </div>
+    </div>
+    <!-- Step 5 -->
+    <div class="wf-step">
+      <div class="wf-connector">
+        <div class="wf-dot">5</div>
+        <div class="wf-line"></div>
+      </div>
+      <div class="wf-content">
+        <h4>Firma Topológica Regional (Objetivo 3)</h4>
+        <p>Construir un vector de características topológicas GABAérgicas por región: entropía modular normalizada, fracción de genes en módulos enriquecidos, centralidad media diferencial, fracción de aristas GABA perdidas. Heatmap de regiones × métricas, ordenado por vulnerabilidad conocida al AD (DLPFC/HCN → alta; PCC/TC → intermedia; CRB → baja). Pruebas de correlación rango-orden.</p>
+      </div>
+    </div>
+    <!-- Step 6 -->
+    <div class="wf-step">
+      <div class="wf-connector">
+        <div class="wf-dot">6</div>
+      </div>
+      <div class="wf-content">
+        <h4>Visualización e Integración</h4>
+        <p>Generación de figuras de calidad de publicación con ggplot2/igraph/tidygraph: (i) barplots de distribución modular GABAérgica por región y condición, (ii) volcano-like plots de conectividad diferencial coloreados por sub-vía, (iii) sub-redes GABAérgicas ego-centradas para genes clave, (iv) heatmap integrador de la firma topológica regional, y (v) reporte HTML autocontenido.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data summary table -->
+  <p style="font-weight:600; margin-top:10px; margin-bottom:8px;">Resumen de datos disponibles:</p>
+  <table class="data-table">
+    <thead>
+      <tr><th>Región</th><th>Cohorte</th><th>Condición AD</th><th>Condición Control</th><th>Aristas/red</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>DLPFC</td><td>ROSMAP</td><td>✓</td><td>✓</td><td>200,000</td></tr>
+      <tr><td>HCN (Hipocampo)</td><td>ROSMAP</td><td>✓</td><td>✓</td><td>200,000</td></tr>
+      <tr><td>PCC (Cingulado Post.)</td><td>ROSMAP</td><td>✓</td><td>✓</td><td>200,000</td></tr>
+      <tr><td>TC (Corteza Temporal)</td><td>Mayo Clinic</td><td>✓</td><td>✓</td><td>200,000</td></tr>
+      <tr><td>CRB (Cerebelo)</td><td>Mayo Clinic</td><td>✓</td><td>✓</td><td>200,000</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 4: GENE SET GABAérgico -->
+<div class="section">
+  <div class="section-title"><span class="num">4</span> Gene Set GABAérgico Propuesto</div>
+  <p>Basado en la revisión sistemática de Carello-Collar et al. (2023), la revisión de Jiménez-Balado & Eich (2021), y la revisión de Krueger-Burg (2025), se propone el siguiente set de genes clasificados por sub-vía funcional:</p>
+
+  <table class="data-table" style="margin-top:16px;">
+    <thead>
+      <tr><th>Sub-vía</th><th>Genes</th><th>Función</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Biosíntesis</strong></td>
+        <td><span class="gene-badge synth">GAD1</span> <span class="gene-badge synth">GAD2</span></td>
+        <td>Enzimas glutamato descarboxilasa (GAD67/GAD65). Sintetizan GABA a partir de glutamato.</td>
+      </tr>
+      <tr>
+        <td><strong>Transporte vesicular</strong></td>
+        <td><span class="gene-badge transport">SLC32A1</span></td>
+        <td>vGAT — empaqueta GABA en vesículas sinápticas.</td>
+      </tr>
+      <tr>
+        <td><strong>Receptores GABA<sub>A</sub></strong></td>
+        <td>
+          <span class="gene-badge receptor">GABRA1</span> <span class="gene-badge receptor">GABRA2</span>
+          <span class="gene-badge receptor">GABRA3</span> <span class="gene-badge receptor">GABRA4</span>
+          <span class="gene-badge receptor">GABRA5</span> <span class="gene-badge receptor">GABRA6</span>
+          <span class="gene-badge receptor">GABRB1</span> <span class="gene-badge receptor">GABRB2</span>
+          <span class="gene-badge receptor">GABRB3</span> <span class="gene-badge receptor">GABRG1</span>
+          <span class="gene-badge receptor">GABRG2</span> <span class="gene-badge receptor">GABRG3</span>
+          <span class="gene-badge receptor">GABRD</span> <span class="gene-badge receptor">GABRE</span>
+          <span class="gene-badge receptor">GABRP</span> <span class="gene-badge receptor">GABRQ</span>
+        </td>
+        <td>Subunidades del receptor ionotrópico GABA<sub>A</sub>. Median inhibición rápida (phasic y tonic). α5 enriquecido en hipocampo.</td>
+      </tr>
+      <tr>
+        <td><strong>Receptores GABA<sub>B</sub></strong></td>
+        <td><span class="gene-badge receptor">GABBR1</span> <span class="gene-badge receptor">GABBR2</span></td>
+        <td>Receptor metabotrópico acoplado a proteína G. Media inhibición lenta.</td>
+      </tr>
+      <tr>
+        <td><strong>Transportadores de recaptación</strong></td>
+        <td>
+          <span class="gene-badge transport">SLC6A1</span> <span class="gene-badge transport">SLC6A11</span>
+          <span class="gene-badge transport">SLC6A13</span>
+        </td>
+        <td>GAT1, GAT3 y GAT2. Recaptan GABA del espacio sináptico (neuronal y glial).</td>
+      </tr>
+      <tr>
+        <td><strong>Catabolismo</strong></td>
+        <td><span class="gene-badge catab">ABAT</span> <span class="gene-badge catab">ALDH5A1</span></td>
+        <td>GABA-transaminasa y aldehído deshidrogenasa. Degradan GABA.</td>
+      </tr>
+      <tr>
+        <td><strong>Marcadores de interneuronas</strong></td>
+        <td>
+          <span class="gene-badge intern">PVALB</span> <span class="gene-badge intern">SST</span>
+          <span class="gene-badge intern">VIP</span> <span class="gene-badge intern">CCK</span>
+          <span class="gene-badge intern">CALB1</span> <span class="gene-badge intern">CALB2</span>
+          <span class="gene-badge intern">NPY</span>
+        </td>
+        <td>Marcadores de subtipos de interneuronas GABAérgicas (PV-basket, somatostatina, VIP, CCK, calbindina, calretinina, NPY).</td>
+      </tr>
+      <tr>
+        <td><strong>Organizadores sinápticos</strong></td>
+        <td>
+          <span class="gene-badge receptor">GPHN</span> <span class="gene-badge receptor">NLGN2</span>
+          <span class="gene-badge receptor">NRXN1</span> <span class="gene-badge receptor">NRXN2</span>
+          <span class="gene-badge receptor">NRXN3</span>
+        </td>
+        <td>Gefirin (scaffold postsináptico GABAérgico), Neuroligina-2 y Neurexinas (adhesión sináptica trans-sináptica).</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECTION 5: BACKGROUND -->
+<div class="section">
+  <div class="section-title"><span class="num">5</span> Background: El Sistema GABAérgico en el Contexto del Alzheimer</div>
+
+  <p>La enfermedad de Alzheimer (AD), la causa más frecuente de demencia, se define biológicamente por la acumulación extracelular de placas de beta-amiloide (Aβ) y la deposición intracelular de ovillos neurofibrilares de tau hiperfosforilada. Aunque las disfunciones de los sistemas colinérgico y glutamatérgico han sido ampliamente caracterizadas en la patogénesis del AD, el papel del sistema GABAérgico — el principal sistema de neurotransmisión inhibitoria del cerebro mamífero — permaneció durante décadas relegado a un segundo plano, bajo la premisa de que las neuronas GABAérgicas eran relativamente resistentes a la patología amiloide (Carello-Collar et al., 2023; Jiménez-Balado & Eich, 2021).</p>
+
+  <p>Esta visión ha sido reevaluada sustancialmente. La revisión sistemática con meta-análisis de Carello-Collar y colaboradores (2023), que incluyó 48 estudios con 603 pacientes AD y 518 controles, demostró una reducción global de componentes GABAérgicos en el cerebro AD. Los niveles de GABA se encontraron reducidos en el cerebro (SMD = −0.48, p < 0.001) y en líquido cefalorraquídeo (SMD = −0.41, p = 0.042), con tamaños de efecto moderados. Además, la enzima de síntesis GAD65/67 (SMD = −0.67), los receptores GABA<sub>A</sub> (SMD = −0.51) y los transportadores de GABA (SMD = −0.51) mostraron reducciones significativas, dibujando un panorama de disfunción sistémica del circuito GABAérgico en AD.</p>
+
+  <p>A nivel regional, los resultados revelan un patrón de vulnerabilidad diferencial. Las cortezas temporal (SMD = −0.67) y frontal (SMD = −0.47) muestran reducciones significativas de GABA, al igual que el cerebelo (SMD = −1.15, el efecto más grande observado). El hipocampo, paradójicamente, muestra resultados discordantes entre estudios pese a ser una de las regiones más afectadas por la patología AD, probablemente reflejando la complejidad de su microcircuitería GABAérgica, donde diferentes subpoblaciones de interneuronas pueden verse afectadas de manera opuesta (Carello-Collar et al., 2023).</p>
+
+  <p>Desde una perspectiva mecanicista, Jiménez-Balado y Eich (2021) articulan un modelo donde la disfunción GABAérgica funciona como pieza central de una cascada patofisiológica. En modelos animales de AD, la pérdida temprana de interneuronas GABAérgicas — particularmente las somatostatina-positivas y parvalbumin-positivas — precede a la pérdida de neuronas piramidales y resulta en hiperactividad del hipocampo. Esta hiperactividad, documentada extensamente mediante fMRI en pacientes con deterioro cognitivo leve (MCI) y AD, se asocia con un desbalance excitatorio/inhibitorio (E/I) que puede acelerar la deposición de amiloide y tau, creando un ciclo de retroalimentación positiva. El polimorfismo APOE ε4, el principal factor de riesgo genético para AD, exacerba este mecanismo al promover la pérdida de interneuronas GABAérgicas del hilo del hipocampo, estableciendo un vínculo directo entre riesgo genético, disfunción GABAérgica e hiperactividad neural.</p>
+
+  <p>La revisión de Krueger-Burg (2025) añade una capa adicional de complejidad al enfatizar la extraordinaria diversidad de las sinapsis GABAérgicas. No solamente existen múltiples subtipos de interneuronas GABAérgicas (PV-basket, PV-chandelier, SST, VIP, CCK, de proyección de largo alcance), sino que cada tipo utiliza combinaciones distintas de proteínas organizadoras sinápticas (neurexinas, neuroligina-2, gefirina, entre otras) que confieren propiedades fisiológicas únicas a la transmisión sináptica. Esta diversidad molecular implica que la "disfunción GABAérgica" en AD no es un fenómeno monolítico, sino un conjunto de desregulaciones que pueden afectar diferencialmente a subtipos sinápticos específicos y, por tanto, a circuitos neurales distintos.</p>
+
+  <p>A pesar del creciente cuerpo de evidencia, existe un vacío importante en la literatura: la mayoría de los estudios han evaluado componentes GABAérgicos individuales (un receptor, una enzima, un nivel de GABA) de forma aislada, sin abordar cómo se reorganiza el sistema GABAérgico como un todo a nivel de redes transcriptómicas. Las redes de coexpresión génica ofrecen una ventana única para examinar esta pregunta, ya que capturan las relaciones de coordinación transcripcional entre todos los genes y permiten identificar módulos funcionales — comunidades de genes que "trabajan juntos" — y detectar cómo estos patrones de coordinación se alteran en la enfermedad. El presente proyecto se sitúa precisamente en esta intersección: al interrogar redes de coexpresión desde la perspectiva de la vía GABAérgica, buscamos pasar de una visión de "componente por componente" a una visión sistémica de la reorganización GABAérgica en AD, explotando la estructura topológica de las redes para revelar patrones de desregulación que los análisis tradicionales de expresión diferencial no pueden detectar.</p>
+</div>
+
+<!-- SECTION 6: REFERENCES -->
+<div class="section">
+  <div class="section-title"><span class="num">6</span> Referencias</div>
+  <ol class="ref-list">
+    <li>Carello-Collar, G., Bellaver, B., Ferreira, P.C.L., et al. (2023). The GABAergic system in Alzheimer's disease: a systematic review with meta-analysis. <em>Molecular Psychiatry</em>, 28, 5025–5036. https://doi.org/10.1038/s41380-023-02140-w</li>
+    <li>Carello-Collar, G., Bellaver, B., Ferreira, P.C.L., et al. (2022). GABAergic system in Alzheimer's disease: a systematic review with meta-analysis [Conference Abstract]. <em>Alzheimer's & Dementia</em>, 18(S3), e064082. https://doi.org/10.1002/alz.064082</li>
+    <li>Jiménez-Balado, J. & Eich, T.S. (2021). GABAergic dysfunction, neural network hyperactivity and memory impairments in human aging and Alzheimer's disease. <em>Seminars in Cell & Developmental Biology</em>, 116, 146–159. https://doi.org/10.1016/j.semcdb.2021.01.005</li>
+    <li>Krueger-Burg, D. (2025). Understanding GABAergic synapse diversity and its implications for GABAergic pharmacotherapy. <em>Trends in Neurosciences</em>, 48(1), 47–63. https://doi.org/10.1016/j.tins.2024.11.007</li>
+    <li>Bennett, D.A., et al. (2018). Religious Orders Study and Rush Memory and Aging Project. <em>Journal of Alzheimer's Disease</em>, 64(s1), S161–S189.</li>
+    <li>Allen, M., et al. (2016). Human whole genome genotype and transcriptome data for Alzheimer's and other neurodegenerative diseases. <em>Scientific Data</em>, 3, 160089.</li>
+  </ol>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  Documento generado como marco de referencia para proyecto de clase · Postgrado en Bioinformática Traslacional · Abril 2026
+</div>
+
+</div>
+</body>
+</html>
